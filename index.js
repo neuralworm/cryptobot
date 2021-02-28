@@ -6,7 +6,10 @@ const red = require("redis").createClient()
 const comma = require("comma-number")
 const moment = require('moment')
 const ordinal = require('ordinal')
+// const {spawn} = require('child-process')
 require("dotenv").config()
+
+// get icon server running
 
 let prices = {}
 
