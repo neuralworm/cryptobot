@@ -1,17 +1,42 @@
-![Bitcoin Logo](/assets/btc@2x.png) 
-# CRYPTOBOT
+<h1 align="center">CryptoBot :robot_face:</h1>
+<p>
+  <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
+  <a href="#" target="_blank">
+    <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" />
+  </a>
+</p>
 
-Simple Discord bot for checking latest cryptocoin prices.  Information on top 500 coins listed on US exchanges.
+> A Discord bot for quickly checking crypto prices.  Can query from any of the top 500 cryptocoins via their commonly-used token names (i.e. btc, eth, etc.).
 
+## Install
 
-## Installation
-
-[Click to add to server.](https://discord.com/api/oauth2/authorize?client_id=815638800133914645&permissions=83968&scope=bot)
+[Click To Add To Server](https://discord.com/api/oauth2/authorize?client_id=815638800133914645&permissions=83968&scope=bot)
 
 ## Usage
 
-### cryptobot 
-List top 5 Crpyto Coins by Market Cap
+```sh
+cryptobot
+```
+Lists top 5 coins by market cap
 
-### cryptobot ***btc***
-List Single Crypto Currency via Symbol
+```sh
+cryptobot btc
+```
+List detailed statistics about bitcoin performance (replace with any commonly used coin abbreviation.)
+
+
+
+## Author
+
+👤 **Jake Miller**
+
+* Website: jakemiller.io
+* Github: [@jakermate](https://github.com/jakermate)
+* LinkedIn: [@jakermiller](https://linkedin.com/in/jakermiller)
+
+## Show your support
+
+Give a ⭐️ if this project helped you!
+
+***
+_This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_
