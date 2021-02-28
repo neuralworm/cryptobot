@@ -87,25 +87,25 @@ const get_prices = async () => {
 client.on("message", (message) => {
   let user = message.author.username
   let command = message.content
-
   console.log(command)
   if (command.startsWith("cryptobot")) {
     let command_list = command.split(" ")
     console.log(command_list)
     // if list command contains a number
-    if (command_list[1] == "list" && command_list[2]) {
+    if (command_list[1] == "list") {
       if (
         !isNaN(command_list[2]) &&
         command_list[2] > 0 &&
         command_list[2] < 8
       ) {
         message.channel.send({
-          embed: new EmbedObject(command_list[2]).getObject(),
+          embed: new EmbedObject().getObject(),
         })
-      }
+    }
+    else message.channel.send({ embed: new EmbedObject().getObject(user) })
     }
     // individual symbol commands
-    if (command_list[1] && command_list[1] !== "list") {
+    else if (command_list[1] && command_list[1] !== "list" && command_list[1] !== 'commands' && command_list[1] !== 'help') {
       let ticker = command_list[1].toLowerCase()
       console.log(ticker)
       let ticker_array = prices.data.map(
@@ -113,12 +113,20 @@ client.on("message", (message) => {
       )
       let index = ticker_array.indexOf(ticker)
       console.log(index)
-      if (index == -1) message.channel.send("Invalid Crypto Ticker")
-      else message.channel.send({ embed: new Ticker(index).getObject() })
+      if(index == -1){
+          let name_array = prices.data.map((object)=> object.name.toLowerCase())
+          index = name_array.indexOf(ticker)
+      }
+      if (index == -1) message.channel.send("Invalid Crypto Ticker. Need help? Use **cryptobot help**")
+      else message.channel.send({ embed: new Ticker(index).getObject(user) })
     }
-
+    else if(command_list[1] && command_list[1] == 'help' || command_list[1] == 'commands'){
+        message.channel.send({embed: new HelpObject().returnHelpObject()})
+    }
     // else print default top five
-    else message.channel.send({ embed: new EmbedObject().getObject() })
+    // else message.channel.send({ embed: new EmbedObject().getObject() })
+
+    else message.channel.send('Invalid Command. Type **cryptobot help** for command list.')
   }
 })
 
@@ -237,7 +245,7 @@ class EmbedObject {
     return fields
   }
 
-  returnEmbedObject() {
+  returnEmbedObject(username) {
     return {
       color: 0x2ecc71,
       title: "Top Crypos By Market Cap",
@@ -263,7 +271,26 @@ class EmbedObject {
     }
   }
 
-  getObject() {
-    return this.returnEmbedObject()
+  getObject(username) {
+    return this.returnEmbedObject(username)
   }
+}
+
+class HelpObject{
+    returnHelpObject(){
+        return{
+      title: "Cryptobot Commands",
+            fields: [
+               {
+                name: "cryptobot list",
+                value: 'List current information on top 5 cryptos.'
+
+               },
+               {
+                   name: "cryptobot *coin_symbol || coin_name*",
+                   value: "List information about single coin. (Use like: cryptobot btc)"
+               }
+            ]
+        }
+    }
 }

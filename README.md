@@ -1,4 +1,4 @@
-<h1 align="center">CryptoBot :robot_face:</h1>
+<h1 align="center">CryptoBot 🤖</h1>
 <p>
   <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
   <a href="#" target="_blank">
@@ -23,6 +23,11 @@ Lists top 5 coins by market cap
 cryptobot btc
 ```
 List detailed statistics about bitcoin performance (replace with any commonly used coin abbreviation.)
+
+```sh
+cryptobot help || cryptobot commands
+```
+List of valid commands
 
 
 
