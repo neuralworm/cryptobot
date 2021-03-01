@@ -137,29 +137,29 @@ class Ticker {
   }
   returnPrice(index) {
     return {
-      name: `Last Price (Updated ${moment(prices.data[index].quote.USD.last_updated).fromNow()})`,
-      value: `$${comma(prices.data[index].quote.USD.price.toFixed(2))} (${prices.data[index].quote.USD.percent_change_24h.toFixed(1)}%)`,
+      value: `Last Price (Updated ${moment(prices.data[index].quote.USD.last_updated).fromNow()})`,
+      name: `$${comma(prices.data[index].quote.USD.price.toFixed(2))} (${prices.data[index].quote.USD.percent_change_24h.toFixed(1)}%)`,
       inline: true,
     }
   }
   returnMarketCap(index) {
     return {
-      name: "Market Cap (USD)",
-      value: `$${comma(prices.data[index].quote.USD.market_cap.toFixed(2))} (${ordinal(prices.data[index].cmc_rank)})`,
+      value: "Market Cap (USD)",
+      name: `$${comma(prices.data[index].quote.USD.market_cap.toFixed(2))} (${ordinal(prices.data[index].cmc_rank)})`,
       inline: true,
     }
   }
   returnVolume(index) {
     return {
-      name: "Volume (24h)",
-      value: `$${comma(prices.data[index].quote.USD.volume_24h.toFixed(0))}`,
+      value: "Volume (24h)",
+      name: `$${comma(prices.data[index].quote.USD.volume_24h.toFixed(0))}`,
       inline: true,
     }
   }
   returnSupply(index){
       return{
-          name: `Supply (${prices.data[index].symbol}`,
-          value: `${comma(prices.data[index].total_supply)}`,
+          value: `Supply (${prices.data[index].symbol}`,
+          name: `${comma(prices.data[index].total_supply)}`,
           inline: true
 
       }
