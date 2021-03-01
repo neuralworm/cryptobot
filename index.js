@@ -45,7 +45,7 @@ cron.schedule("*/5 * * * *", async () => {
   let fetch_res = await get_prices()
   if (fetch_res == 200) {
     console.log("Got new prices.")
-    console.log(prices)
+    // console.log(prices)
   }
   if (fetch_res == 500) {
     console.log("Error getting prices.")
