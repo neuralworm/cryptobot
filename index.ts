@@ -61,14 +61,14 @@ red.on("error", (err: Error) => {
 red.on("ready", () => {
   // get cached crypto rankings
   red.get("crypto_latest", (err: Error, reply: string) => {
-    console.log("getting from redis")
+    console.log("Checking redis for Prices Object")
     if (err) {
       console.log(err)
       return
     }
     if (reply) {
       prices = JSON.parse(reply)
-      console.log(prices.status)
+      console.log('CryptoBot up and running with latest prices from ' + moment(prices.status.timestamp).format('MMMM Do YYYY, h:mm:ss a'))
       // console.log(reply)
     }
   })
@@ -80,7 +80,7 @@ red.on("ready", () => {
       red.set('crypto_meta', JSON.stringify(meta))
       return
     }
-    console.log('dont need to fetch')
+    console.log('Coin MetaData present. Will not fetch.')
     meta = res
   })
 })
@@ -90,9 +90,8 @@ client.login(config.BOT_TOKEN)
 let bot_id: string
 client.on('ready', () => {
   bot_id = client.user?.id!
-  console.log(bot_id)
 })
-console.log("CryptoBot running.")
+console.log("CryptoBot starting.")
 
 // CRON SETUP
 // cmc general list
@@ -123,7 +122,7 @@ const get_cmc_list = async (): Promise<any> => {
     })
     if (res.ok) {
       prices = await res.json()
-      console.log(prices)
+      // console.log(prices)
       // set into redis for persistence
       red.set("crypto_latest", JSON.stringify(prices))
     }
@@ -154,7 +153,7 @@ client.on("message", (message: Message) => {
   console.log(command)
   // commands
   if (command.startsWith(prefix)) {
-    let command_list = command.split(" ")
+    let command_list = command.split(/ +/)
     command_list.shift()
     commandParser(command_list[0], command_list, message)
     return
@@ -201,7 +200,12 @@ function help(command_list: string[], message: Message) {
 
 }
 function list(command_list: string[], message: Message) {
-  message.channel.send(`<@${message.author.id}>`, { embed: new Ranking(prices).getObject() })
+  let number = parseInt(command_list[1])
+  if(number > 5){
+    message.channel.send(`<@${message.author.id}>\n${new Ranking(prices, number).getObject()}`)
+    return
+  }
+  message.channel.send(`<@${message.author.id}>`, { embed: new Ranking(prices, number).getObject() })
 
 }
 function compare(command_list: string[], message: Message) {
@@ -249,4 +253,14 @@ function getIndex(symbol_or_name: string): number {
   let index = prices.data.map((coin: any) => coin.name.toLowerCase()).indexOf(symbol_or_name)
   if (index < 0) index = prices.data.map((coin: any) => coin.symbol.toLowerCase()).indexOf(symbol_or_name)
   return index
+}
+
+// args are optional options parameteres stacked after a hyphen, ie -dm
+function parseArgs(args: string){
+  if(args.charAt(0) !== "-") return null
+  
+}
+
+function checkEmbedLength(embed: any){
+  return JSON.stringify(embed).length
 }

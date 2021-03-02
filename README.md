@@ -15,14 +15,25 @@
 ## Usage
 
 ```sh
-cryptobot
+cryptobot list
 ```
 Lists top 5 coins by market cap
+
+```sh
+cryptobot list n
+```
+Lists top n coins by market cap (max 20)
 
 ```sh
 cryptobot btc
 ```
 List detailed statistics about bitcoin performance (replace with any commonly used coin abbreviation.)
+
+```sh
+cryptobot compare btc eth
+```
+Compare recent statistics of two crypto coins with relative gains and performance comparison.
+
 
 ```sh
 cryptobot help || cryptobot commands
