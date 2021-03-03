@@ -24,16 +24,16 @@ const prefix = "cryptobot"
 let prices: any = {}
 let meta: any = [];
 // set meta data on server start
-const get_meta =  async () => {
+const get_meta = async () => {
   try {
     let slug_list = get_slug_list()
     let res = await fetcher(`https://pro-api.coinmarketcap.com/v2/cryptocurrency/info?slug=${slug_list}`, {
-      headers:{
+      headers: {
         "X-CMC_PRO_API_KEY": API_KEY_CMC
       }
     })
     console.log(res.status)
-    if(res.ok){
+    if (res.ok) {
       let json = await res.json()
       return json
     }
@@ -44,11 +44,11 @@ const get_meta =  async () => {
   }
 }
 
-function get_slug_list(){
+function get_slug_list() {
   let list = ""
-  prices.data.forEach((obj: any, index: number)=>{
-      // if(index > 0) return
-      list += `${obj.slug},`
+  prices.data.forEach((obj: any, index: number) => {
+    // if(index > 0) return
+    list += `${obj.slug},`
   })
   list = list.slice(0, -1)
   return list
@@ -73,9 +73,9 @@ red.on("ready", () => {
     }
   })
   // get cached crypto meta data
-  red.get('crypto_meta', async (err: Error, reply: string)=>{
+  red.get('crypto_meta', async (err: Error, reply: string) => {
     let res = JSON.parse(reply)
-    if(err || !res){
+    if (err || !res) {
       let meta = await get_meta()
       red.set('crypto_meta', JSON.stringify(meta))
       return
@@ -201,11 +201,10 @@ function help(command_list: string[], message: Message) {
 }
 function list(command_list: string[], message: Message) {
   let number = parseInt(command_list[1])
-  if(number > 5){
-    message.channel.send(`<@${message.author.id}>\n${new Ranking(prices, number).getObject()}`)
-    return
-  }
-  message.channel.send(`<@${message.author.id}>`, { embed: new Ranking(prices, number).getObject() })
+  console.log('sending list block')
+  message.channel.send(`<@${message.author.id}>\n${new Ranking(prices, number).getObject()}`)
+  return
+ 
 
 }
 function compare(command_list: string[], message: Message) {
@@ -256,11 +255,11 @@ function getIndex(symbol_or_name: string): number {
 }
 
 // args are optional options parameteres stacked after a hyphen, ie -dm
-function parseArgs(args: string){
-  if(args.charAt(0) !== "-") return null
-  
+function parseArgs(args: string) {
+  if (args.charAt(0) !== "-") return null
+
 }
 
-function checkEmbedLength(embed: any){
+function checkEmbedLength(embed: any) {
   return JSON.stringify(embed).length
 }
