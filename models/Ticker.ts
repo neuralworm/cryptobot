@@ -113,6 +113,7 @@ export default class Ticker {
         color: 0x2ecc71,
         title: `${this.prices.data[this.tickerIndex].name} (${this.prices.data[this.tickerIndex].symbol
           })`,
+          description: `${this.meta_data.data[this.prices.data[this.tickerIndex].id].description}`,
         url: `https://coinmarketcap.com/currencies/${this.prices.data[this.tickerIndex].slug
           }/`,
         thumbnail: {

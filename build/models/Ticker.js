@@ -35,6 +35,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -48,43 +53,47 @@ var fetcher = require('node-fetch');
 var request = require('request-promise');
 require('dotenv').config();
 var Ticker = /** @class */ (function () {
-    function Ticker(tickerIndex, numics_object, prices, meta_data) {
+    function Ticker(tickerIndex, numics_object, prices, meta_data, days) {
         if (tickerIndex === void 0) { tickerIndex = 0; }
         if (numics_object === void 0) { numics_object = {}; }
+        if (days === void 0) { days = 7; }
         this.tickerIndex = tickerIndex;
         this.coin_object = numics_object;
         this.prices = prices;
         this.meta_data = meta_data;
         this.grid = new Grid_1.default();
         this.coin_token = numics_object.id;
-        this.end_date = new Date();
-        this.start_date = new Date(Date.now() - (1000 * 60 * 60 * 24 * 7));
-        this.spark_lines_url = "https://api.nomics.com/v1/currencies/sparkline?key=" + process.env.API_TOKEN_NOMICS + "&ids=" + this.coin_token + "&start=" + this.start_date.toISOString() + "&end=" + this.end_date.toISOString();
+        this.days = days;
+        this.ohlc_url = "https://api.coingecko.com/api/v3/coins/" + prices.data[tickerIndex].slug + "/ohlc?vs_currency=usd&days=" + this.days;
+        this.ohlc_data = [];
+        this.getOHLC();
     }
-    Ticker.prototype.getSparklines = function () {
+    Ticker.prototype.getOHLC = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var id, res, err_1;
+            var id, res, json, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        console.log(this.spark_lines_url);
+                        console.log(this.ohlc_url);
                         _a.label = 1;
                     case 1:
-                        _a.trys.push([1, 3, , 4]);
+                        _a.trys.push([1, 5, , 6]);
                         id = this.coin_object.id;
-                        return [4 /*yield*/, request({
-                                uri: this.spark_lines_url,
-                                json: true
-                            })];
+                        return [4 /*yield*/, fetcher(this.ohlc_url)];
                     case 2:
                         res = _a.sent();
-                        console.log(res);
-                        return [3 /*break*/, 4];
+                        console.log(res.status);
+                        if (!(res.status == 200)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, res.json()];
                     case 3:
+                        json = _a.sent();
+                        return [2 /*return*/, json.map(function (obj) { return new Candle(obj[0], obj[1], obj[2], obj[3], obj[4]); })];
+                    case 4: return [2 /*return*/, []];
+                    case 5:
                         err_1 = _a.sent();
                         console.log(err_1);
-                        return [3 /*break*/, 4];
-                    case 4: return [2 /*return*/];
+                        return [2 /*return*/, []];
+                    case 6: return [2 /*return*/];
                 }
             });
         });
@@ -132,24 +141,40 @@ var Ticker = /** @class */ (function () {
             inline: inline
         };
     };
+    Ticker.prototype.returnMetaData = function (index) {
+        var field_array = [];
+        if (this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.website) {
+            field_array.push(this.returnField("Website", this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.website));
+        }
+        if (this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.technical_doc[0]) {
+            field_array.push(this.returnField('White Paper', this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.technical_doc[0]));
+        }
+        if (this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.explorer[0]) {
+            field_array.push(this.returnField('Blockchain Viewer', this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.explorer[0]));
+        }
+        if (this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.source_code[0]) {
+            field_array.push(this.returnField('Source Code', this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.source_code[0]));
+        }
+        return field_array;
+    };
     Ticker.prototype.returnEmbedObject = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 return [2 /*return*/, {
                         color: 0x2ecc71,
                         title: this.prices.data[this.tickerIndex].name + " (" + this.prices.data[this.tickerIndex].symbol + ")",
+                        description: "" + this.meta_data.data[this.prices.data[this.tickerIndex].id].description,
                         url: "https://coinmarketcap.com/currencies/" + this.prices.data[this.tickerIndex].slug + "/",
                         thumbnail: {
                             url: this.meta_data.data[this.prices.data[this.tickerIndex].id].logo,
                         },
-                        fields: [
+                        fields: __spreadArray([
                             this.returnPrice(this.tickerIndex),
                             this.returnMarketCap(this.tickerIndex),
                             // this.returnSpacer(),
                             this.returnVolume(this.tickerIndex),
-                            this.returnSupply(this.tickerIndex),
-                            // this.returnField(`Past ${(this.end_date.getTime() - this.start_date.getTime()) / (1000*60*60*24)} Days`, await this.render())
-                        ],
+                            this.returnSupply(this.tickerIndex)
+                        ], this.returnMetaData(this.tickerIndex)),
                         timestamp: new Date(),
                         footer: {
                             text: "Brought to you by CryptoBot",
@@ -162,43 +187,29 @@ var Ticker = /** @class */ (function () {
         var template = "";
         return template;
     };
-    Ticker.prototype.createChart = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var grid, object, points;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        grid = [['']];
-                        return [4 /*yield*/, this.getSparklines()];
-                    case 1:
-                        _a.sent();
-                        object = this.spark_lines[0];
-                        points = object.timestamps.map(function (timestampString, index) {
-                            return new Point(timestampString, object.prices[index]);
-                        });
-                        console.log(chart.plot(points.map(function (pnt) { return pnt.price; })));
-                        return [2 /*return*/, grid];
-                }
-            });
-        });
-    };
+    // async createChart(): Promise<string[][]>{
+    //   let grid: string[][] = [['']]
+    //   await this.getOHLC()
+    //   let object = this.ohlc_data[0]
+    //   // create grid section from spark_lines
+    //   let points: Point[] = object.timestamps.map((timestampString: string, index: number)=>{
+    //     return new Point(timestampString, object.prices[index])
+    //   })
+    //   console.log(chart.plot(points.map(pnt=>pnt.price)))
+    //   return grid
+    // }
     Ticker.prototype.render = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var chart, rendered_string;
+            var rendered_string;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.createChart()];
-                    case 1:
-                        chart = _a.sent();
-                        rendered_string = '';
-                        this.grid.coordinates.forEach(function (array, array_index) {
-                            array.forEach(function (cell_value, cell_index) {
-                                rendered_string += "" + cell_value;
-                            });
-                            rendered_string += '\n';
-                        });
-                        return [2 /*return*/, "```" + rendered_string + "```"];
-                }
+                rendered_string = '';
+                this.grid.coordinates.forEach(function (array, array_index) {
+                    array.forEach(function (cell_value, cell_index) {
+                        rendered_string += "" + cell_value;
+                    });
+                    rendered_string += '\n';
+                });
+                return [2 /*return*/, "```" + rendered_string + "```"];
             });
         });
     };
@@ -227,4 +238,14 @@ var Point = /** @class */ (function () {
         return price;
     };
     return Point;
+}());
+var Candle = /** @class */ (function () {
+    function Candle(date, open, high, low, close) {
+        this.date = new Date(date);
+        this.open = open;
+        this.high = high;
+        this.low = low;
+        this.close = close;
+    }
+    return Candle;
 }());

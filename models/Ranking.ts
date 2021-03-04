@@ -5,9 +5,11 @@ export default class Ranking {
   slice_start: number
   slice_end: number
   constructor(prices: any, slice_start: number = 1, slice_end: number = 25) {
+    console.log(slice_start)
+    console.log(slice_end)
     this.prices = prices
     this.slice_start = slice_start
-    this.slice_end = slice_end - slice_start < 25 ? slice_end : slice_start + 25
+    this.slice_end = slice_end > slice_start ? (slice_end - slice_start < 25 ? slice_end : slice_start + 25) : slice_start
   }
 
   returnField(index: number, prices: any): EmbedField[] {

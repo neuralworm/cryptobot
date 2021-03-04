@@ -50,6 +50,7 @@ var ordinal = require('ordinal');
 var Ticker_1 = __importDefault(require("./models/Ticker"));
 var Help_1 = __importDefault(require("./models/Help"));
 var Ranking_1 = __importDefault(require("./models/Ranking"));
+var Comparison_1 = __importDefault(require("./models/Comparison"));
 require("dotenv").config();
 var API_KEY_NOMICS = process.env.API_TOKEN_NOMICS;
 var API_KEY_CMC = process.env.API_TOKEN_CMC;
@@ -169,6 +170,7 @@ cron.schedule("*/15 * * * *", function () { return __awaiter(void 0, void 0, voi
 // API CALLS
 var API_ROOT_CMC = "https://pro-api.coinmarketcap.com";
 var API_ROOT_NOMICS = "https://api.nomics.com/v1";
+var API_ROOT_GECKO = "https://api.coingecko.com/api/v3/";
 var get_cmc_list = function () { return __awaiter(void 0, void 0, void 0, function () {
     var url, res, err_2;
     return __generator(this, function (_a) {
@@ -286,59 +288,68 @@ function list(command_list, message) {
     }
     //  parse slice string here
     var slice = parseRange(list_slice_request);
+    console.log(slice);
     message.channel.send("<@" + message.author.id + ">\n" + new Ranking_1.default(prices, slice[0], slice[1]).getObject());
     return;
 }
 function parseRange(number_range_string) {
     var range = number_range_string.split("-").map(function (string) { return parseInt(string); });
-    console.log(range);
+    if (range.length == 1)
+        return [range[0], range[0]];
     return range;
 }
 function compare(command_list, message) {
-    var coin_1 = command_list[1], coin_2 = command_list[2];
-    var index_1 = getIndex(coin_1), index_2 = getIndex(coin_2);
-    if (index_1 < 0 || index_2 < 0) {
-        message.channel.send("Invalid coin identifier.");
-        return;
+    var compare_array = [];
+    for (var i = 1; i < command_list.length; i++) {
+        compare_array.push(command_list[i]);
     }
-    message.channel.send(returnCompareString(index_1, index_2));
+    var index_array = compare_array.map(function (val) {
+        return getIndex(val);
+    }).slice(0, 20).filter(function (index) {
+        if (index >= 0)
+            return true;
+        return false;
+    });
+    message.channel.send(new Comparison_1.default(index_array, prices).render());
 }
 function send_single_coin(command_list, message) {
     return __awaiter(this, void 0, void 0, function () {
-        var ticker, index, numics_object, _a, _b, err_4;
-        var _c;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
+        var ticker, index, numics_object, days, _a, _b, _c, err_4;
+        var _d;
+        return __generator(this, function (_e) {
+            switch (_e.label) {
                 case 0:
                     ticker = command_list[0];
                     index = getIndex(ticker);
-                    _d.label = 1;
+                    _e.label = 1;
                 case 1:
-                    _d.trys.push([1, 4, , 5]);
-                    return [4 /*yield*/, get_by_token(ticker)];
+                    _e.trys.push([1, 4, , 5]);
+                    return [4 /*yield*/, get_by_token(ticker)
+                        // console.log(numics_object)
+                        // if (!numics_object[0]) throw Error()
+                    ];
                 case 2:
-                    numics_object = _d.sent();
-                    console.log(numics_object);
-                    // if (!numics_object[0]) throw Error()
+                    numics_object = _e.sent();
+                    days = parseInt(command_list[1]) || undefined;
                     // // new hotness
                     // let embed = await new Ticker(index, numics_object[0], prices, meta).getObject()
                     // // let body = await new Ticker(index, numics_object[0], prices, meta).render()
                     // message.channel.send({embed: embed})
                     // old embed version
                     _b = (_a = message.channel).send;
-                    _c = {};
-                    return [4 /*yield*/, new Ticker_1.default(index, numics_object[0], prices, meta).getObject()];
+                    _c = ["<@" + message.author.id + ">"];
+                    _d = {};
+                    return [4 /*yield*/, new Ticker_1.default(index, numics_object[0], prices, meta, days).getObject()];
                 case 3:
-                    // if (!numics_object[0]) throw Error()
                     // // new hotness
                     // let embed = await new Ticker(index, numics_object[0], prices, meta).getObject()
                     // // let body = await new Ticker(index, numics_object[0], prices, meta).render()
                     // message.channel.send({embed: embed})
                     // old embed version
-                    _b.apply(_a, [(_c.embed = _d.sent(), _c)]);
+                    _b.apply(_a, _c.concat([(_d.embed = _e.sent(), _d)]));
                     return [3 /*break*/, 5];
                 case 4:
-                    err_4 = _d.sent();
+                    err_4 = _e.sent();
                     // if (index >= 0) {
                     //   message.channel.send({ embed: new Ticker(index, null, prices, meta).getObject() })
                     //   return
@@ -349,10 +360,6 @@ function send_single_coin(command_list, message) {
             }
         });
     });
-}
-function returnCompareString(index_1, index_2) {
-    var string = "e";
-    return string;
 }
 function sendError(message) {
     message.channel.send('Invalid Command. Type **cryptobot help** for command list.');

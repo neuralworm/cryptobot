@@ -31,9 +31,9 @@ cryptobot btc
 List detailed statistics about bitcoin performance (replace with any commonly used coin abbreviation.)
 
 ```sh
-cryptobot compare btc eth
+cryptobot compare btc eth ... ...
 ```
-Compare recent statistics of two crypto coins with relative gains and performance comparison.
+Compare recent statistics of up to 20 crypto coins with relative gains and performance comparison.
 
 
 ```sh

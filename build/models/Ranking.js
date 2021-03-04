@@ -10,9 +10,11 @@ var Ranking = /** @class */ (function () {
     function Ranking(prices, slice_start, slice_end) {
         if (slice_start === void 0) { slice_start = 1; }
         if (slice_end === void 0) { slice_end = 25; }
+        console.log(slice_start);
+        console.log(slice_end);
         this.prices = prices;
         this.slice_start = slice_start;
-        this.slice_end = slice_end - slice_start < 25 ? slice_end : slice_start + 25;
+        this.slice_end = slice_end > slice_start ? (slice_end - slice_start < 25 ? slice_end : slice_start + 25) : slice_start;
     }
     Ranking.prototype.returnField = function (index, prices) {
         return [

@@ -1,3 +1,4 @@
+const comma = require('comma-number')
 export default class Comparison{
     comparison_indexes:  number[]
     prices: any
@@ -14,6 +15,7 @@ export default class Comparison{
         row += this.getCell(7, this.prices.data[index].quote.USD.percent_change_1h.toFixed(2) + "%")
         row += this.getCell(7, this.prices.data[index].quote.USD.percent_change_24h.toFixed(2) + "%")
         row += this.getCell(7, this.prices.data[index].quote.USD.percent_change_7d.toFixed(2) + "%")
+        row += this.getCell(18, `$${comma((this.prices.data[index].quote.USD.volume_24h).toFixed(0))}`)
 
         return `${row}\n`
     }
@@ -23,7 +25,7 @@ export default class Comparison{
         return `[${substring}]`
     }
     render(): any{
-        let header = `[SYMB ][NAME      ][     1H][    24H][     7D][   1M][VOLUME  ]\n`
+        let header = `[SYMB ][NAME      ][     1H][    24H][     7D][      VOLUME (USD)]\n`
         this.comparison_indexes.forEach((index)=>{
             header += this.getRow(index)
         })

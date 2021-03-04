@@ -208,6 +208,7 @@ function list(command_list: string[], message: Message) {
   }
   //  parse slice string here
   let slice: number[] = parseRange(list_slice_request)
+  console.log(slice)
   message.channel.send(`<@${message.author.id}>\n${new Ranking(prices, slice[0], slice[1]).getObject()}`)
   return
 
@@ -215,7 +216,7 @@ function list(command_list: string[], message: Message) {
 }
 function parseRange(number_range_string: string): number[] {
   let range = number_range_string.split("-").map(string => parseInt(string))
-  console.log(range)
+  if(range.length == 1) return [range[0], range[0]]
   return range
 }
 function compare(command_list: string[], message: Message) {
@@ -238,14 +239,13 @@ async function send_single_coin(command_list: string[], message: Message) {
   let index = getIndex(ticker)
   try {
     let numics_object = await get_by_token(ticker)
-    console.log(numics_object)
+    // console.log(numics_object)
     // if (!numics_object[0]) throw Error()
     let days = parseInt(command_list[1]) || undefined
     // // new hotness
     // let embed = await new Ticker(index, numics_object[0], prices, meta).getObject()
     // // let body = await new Ticker(index, numics_object[0], prices, meta).render()
     // message.channel.send({embed: embed})
-    console.log(days)
     // old embed version
     message.channel.send(`<@${message.author.id}>`, { embed: await new Ticker(index, numics_object[0], prices, meta, days).getObject() })
 
