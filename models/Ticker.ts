@@ -2,7 +2,7 @@ import Field from './Field'
 import moment from 'moment'
 const comma = require("comma-number")
 import ordinal from 'ordinal'
-import Grid from './Grid'
+// import Grid from './Grid'
 const chart = require('asciichart')
 const fetcher = require('node-fetch')
 const request = require('request-promise')
@@ -12,7 +12,7 @@ export default class Ticker {
     coin_object: any
     meta_data: any
     prices: any
-    grid: Grid
+    // grid: Grid
     ohlc_url: string
     ohlc_data: Candle[]
     coin_token: string
@@ -22,7 +22,6 @@ export default class Ticker {
       this.coin_object = numics_object
       this.prices = prices
       this.meta_data = meta_data
-      this.grid = new Grid()
       this.coin_token = numics_object.id
       this.days = days
       this.ohlc_url = `https://api.coingecko.com/api/v3/coins/${prices.data[tickerIndex].slug}/ohlc?vs_currency=usd&days=${this.days}`
@@ -152,19 +151,7 @@ export default class Ticker {
 
     //   return grid
     // }
-    async render(): Promise<string>{
-      // get spark lines
-      // let chart = await this.createChart()
-      let rendered_string = ''
-      
-      this.grid.coordinates.forEach((array, array_index)=>{
-        array.forEach((cell_value, cell_index)=>{
-          rendered_string += `${cell_value}`
-        })
-        rendered_string += '\n'
-      })
-      return `\`\`\`${rendered_string}\`\`\``
-    }
+    
     async getObject() {
       return await this.returnEmbedObject()
     }

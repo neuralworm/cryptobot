@@ -47,7 +47,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var moment_1 = __importDefault(require("moment"));
 var comma = require("comma-number");
 var ordinal_1 = __importDefault(require("ordinal"));
-var Grid_1 = __importDefault(require("./Grid"));
+// import Grid from './Grid'
 var chart = require('asciichart');
 var fetcher = require('node-fetch');
 var request = require('request-promise');
@@ -61,7 +61,6 @@ var Ticker = /** @class */ (function () {
         this.coin_object = numics_object;
         this.prices = prices;
         this.meta_data = meta_data;
-        this.grid = new Grid_1.default();
         this.coin_token = numics_object.id;
         this.days = days;
         this.ohlc_url = "https://api.coingecko.com/api/v3/coins/" + prices.data[tickerIndex].slug + "/ohlc?vs_currency=usd&days=" + this.days;
@@ -198,21 +197,6 @@ var Ticker = /** @class */ (function () {
     //   console.log(chart.plot(points.map(pnt=>pnt.price)))
     //   return grid
     // }
-    Ticker.prototype.render = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var rendered_string;
-            return __generator(this, function (_a) {
-                rendered_string = '';
-                this.grid.coordinates.forEach(function (array, array_index) {
-                    array.forEach(function (cell_value, cell_index) {
-                        rendered_string += "" + cell_value;
-                    });
-                    rendered_string += '\n';
-                });
-                return [2 /*return*/, "```" + rendered_string + "```"];
-            });
-        });
-    };
     Ticker.prototype.getObject = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
