@@ -240,7 +240,7 @@ async function send_single_coin(command_list: string[], message: Message) {
     // message.channel.send({embed: embed})
 
     // old embed version
-    message.channel.send({ embed: await new Ticker(index, numics_object[0], prices, meta).getObject() })
+    message.channel.send(`<@${message.author.id}>\n\`\`\`diff\n -priceup\`\`\`}`,{ embed: await new Ticker(index, numics_object[0], prices, meta).getObject() })
 
   }
   catch (err) {
