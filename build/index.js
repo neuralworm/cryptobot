@@ -35,11 +35,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from) {
-    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-        to[j] = from[i];
-    return to;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -53,6 +48,8 @@ var comma = require("comma-number");
 var moment = require('moment');
 var ordinal = require('ordinal');
 var Ticker_1 = __importDefault(require("./models/Ticker"));
+var Help_1 = __importDefault(require("./models/Help"));
+var Ranking_1 = __importDefault(require("./models/Ranking"));
 require("dotenv").config();
 var API_KEY_NOMICS = process.env.API_TOKEN_NOMICS;
 var API_KEY_CMC = process.env.API_TOKEN_CMC;
@@ -107,14 +104,14 @@ red.on("error", function (err) {
 red.on("ready", function () {
     // get cached crypto rankings
     red.get("crypto_latest", function (err, reply) {
-        console.log("getting from redis");
+        console.log("Checking redis for Prices Object");
         if (err) {
             console.log(err);
             return;
         }
         if (reply) {
             prices = JSON.parse(reply);
-            console.log(prices.status);
+            console.log('CryptoBot up and running with latest prices from ' + moment(prices.status.timestamp).format('MMMM Do YYYY, h:mm:ss a'));
             // console.log(reply)
         }
     });
@@ -132,7 +129,7 @@ red.on("ready", function () {
                     red.set('crypto_meta', JSON.stringify(meta_1));
                     return [2 /*return*/];
                 case 2:
-                    console.log('dont need to fetch');
+                    console.log('Coin MetaData present. Will not fetch.');
                     meta = res;
                     return [2 /*return*/];
             }
@@ -145,9 +142,8 @@ var bot_id;
 client.on('ready', function () {
     var _a;
     bot_id = (_a = client.user) === null || _a === void 0 ? void 0 : _a.id;
-    console.log(bot_id);
 });
-console.log("CryptoBot running.");
+console.log("CryptoBot starting.");
 // CRON SETUP
 // cmc general list
 cron.schedule("*/15 * * * *", function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -191,10 +187,13 @@ var get_cmc_list = function () { return __awaiter(void 0, void 0, void 0, functi
             case 2:
                 res = _a.sent();
                 if (!res.ok) return [3 /*break*/, 4];
-                return [4 /*yield*/, res.json()];
+                return [4 /*yield*/, res.json()
+                    // console.log(prices)
+                    // set into redis for persistence
+                ];
             case 3:
                 prices = _a.sent();
-                console.log(prices);
+                // console.log(prices)
                 // set into redis for persistence
                 red.set("crypto_latest", JSON.stringify(prices));
                 _a.label = 4;
@@ -235,10 +234,9 @@ var get_by_token = function (token) { return __awaiter(void 0, void 0, void 0, f
 // EVENTS
 client.on("message", function (message) {
     var command = message.content.trim().toLowerCase();
-    console.log(command);
     // commands
     if (command.startsWith(prefix)) {
-        var command_list = command.split(" ");
+        var command_list = command.split(/ +/);
         command_list.shift();
         commandParser(command_list[0], command_list, message);
         return;
@@ -278,10 +276,23 @@ function commandParser(primary_command, command_list, message) {
 }
 // command branches
 function help(command_list, message) {
-    message.channel.send({ embed: new HelpObject().returnHelpObject() });
+    message.channel.send({ embed: new Help_1.default().returnHelpObject() });
 }
 function list(command_list, message) {
-    message.channel.send("<@" + message.author.id + ">", { embed: new CoinListObject().getObject() });
+    var list_slice_request = command_list[1];
+    if (!list_slice_request) {
+        message.channel.send("<@" + message.author.id + ">\n" + new Ranking_1.default(prices).getObject());
+        return;
+    }
+    //  parse slice string here
+    var slice = parseRange(list_slice_request);
+    message.channel.send("<@" + message.author.id + ">\n" + new Ranking_1.default(prices, slice[0], slice[1]).getObject());
+    return;
+}
+function parseRange(number_range_string) {
+    var range = number_range_string.split("-").map(function (string) { return parseInt(string); });
+    console.log(range);
+    return range;
 }
 function compare(command_list, message) {
     var coin_1 = command_list[1], coin_2 = command_list[2];
@@ -294,38 +305,53 @@ function compare(command_list, message) {
 }
 function send_single_coin(command_list, message) {
     return __awaiter(this, void 0, void 0, function () {
-        var ticker, index, numics_object, err_4;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var ticker, index, numics_object, _a, _b, err_4;
+        var _c;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
                 case 0:
                     ticker = command_list[0];
                     index = getIndex(ticker);
-                    _a.label = 1;
+                    _d.label = 1;
                 case 1:
-                    _a.trys.push([1, 3, , 4]);
+                    _d.trys.push([1, 4, , 5]);
                     return [4 /*yield*/, get_by_token(ticker)];
                 case 2:
-                    numics_object = _a.sent();
-                    if (!numics_object[0])
-                        throw Error();
-                    // console.log(new Ticker(index, numics_object[0]).getObject())
-                    message.channel.send({ embed: new Ticker_1.default(index, numics_object[0], prices, meta).getObject() });
-                    return [3 /*break*/, 4];
+                    numics_object = _d.sent();
+                    console.log(numics_object);
+                    // if (!numics_object[0]) throw Error()
+                    // // new hotness
+                    // let embed = await new Ticker(index, numics_object[0], prices, meta).getObject()
+                    // // let body = await new Ticker(index, numics_object[0], prices, meta).render()
+                    // message.channel.send({embed: embed})
+                    // old embed version
+                    _b = (_a = message.channel).send;
+                    _c = {};
+                    return [4 /*yield*/, new Ticker_1.default(index, numics_object[0], prices, meta).getObject()];
                 case 3:
-                    err_4 = _a.sent();
-                    if (index >= 0) {
-                        message.channel.send({ embed: new Ticker_1.default(index, null, prices, meta).getObject() });
-                        return [2 /*return*/];
-                    }
+                    // if (!numics_object[0]) throw Error()
+                    // // new hotness
+                    // let embed = await new Ticker(index, numics_object[0], prices, meta).getObject()
+                    // // let body = await new Ticker(index, numics_object[0], prices, meta).render()
+                    // message.channel.send({embed: embed})
+                    // old embed version
+                    _b.apply(_a, [(_c.embed = _d.sent(), _c)]);
+                    return [3 /*break*/, 5];
+                case 4:
+                    err_4 = _d.sent();
+                    // if (index >= 0) {
+                    //   message.channel.send({ embed: new Ticker(index, null, prices, meta).getObject() })
+                    //   return
+                    // }
                     message.channel.send('Invalid coin identifier.');
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
+                    return [3 /*break*/, 5];
+                case 5: return [2 /*return*/];
             }
         });
     });
 }
 function returnCompareString(index_1, index_2) {
-    var string = "";
+    var string = "e";
     return string;
 }
 function sendError(message) {
@@ -338,85 +364,11 @@ function getIndex(symbol_or_name) {
         index = prices.data.map(function (coin) { return coin.symbol.toLowerCase(); }).indexOf(symbol_or_name);
     return index;
 }
-var CoinListObject = /** @class */ (function () {
-    function CoinListObject() {
-    }
-    CoinListObject.prototype.returnField = function (index) {
-        return [
-            {
-                name: index + 1 + ". " + prices.data[index].name + " (" + prices.data[index].symbol + ")",
-                value: "$" + comma(prices.data[index].quote.USD.price.toFixed(2)),
-                inline: true,
-            },
-            {
-                name: "Market Cap (USD)",
-                value: "$" + comma(prices.data[index].quote.USD.market_cap.toFixed(2)),
-                inline: true,
-            },
-            {
-                name: "\u200B",
-                value: "\u200B",
-                inline: false
-            },
-        ];
-    };
-    CoinListObject.prototype.returnFields = function (number) {
-        if (number === void 0) { number = 5; }
-        var fields = [];
-        for (var i = 0; i < number; i++) {
-            // fields.push(this.returnField(i))
-            fields = __spreadArray(__spreadArray([], fields), this.returnField(i));
-        }
-        return fields;
-    };
-    CoinListObject.prototype.returnEmbedObject = function () {
-        // @ts-ignore
-        return {
-            color: 0x2ecc71,
-            title: "Top Crypos By Market Cap",
-            // url: 'https://discord.js.org',
-            // author: {
-            //     name: 'CryptoBot',
-            //     icon_url: 'https://i.imgur.com/wSTFkRM.png',
-            //     url: 'https://discord.js.org',
-            // },
-            // description: `@${username}`,
-            // thumbnail: {
-            //     url: 'https://i.imgur.com/wSTFkRM.png',
-            // },
-            fields: this.returnFields(),
-            // image: {
-            // 	url: 'https://i.imgur.com/wSTFkRM.png',
-            // },
-            timestamp: new Date().getMilliseconds(),
-            footer: {
-                text: "Brought to you by CryptoBot",
-                // icon_url: 'https://i.imgur.com/wSTFkRM.png',
-            },
-        };
-    };
-    CoinListObject.prototype.getObject = function () {
-        return this.returnEmbedObject();
-    };
-    return CoinListObject;
-}());
-var HelpObject = /** @class */ (function () {
-    function HelpObject() {
-    }
-    HelpObject.prototype.returnHelpObject = function () {
-        return {
-            title: "Cryptobot Commands",
-            fields: [
-                {
-                    name: "cryptobot list",
-                    value: 'List current information on top 5 cryptos.'
-                },
-                {
-                    name: "cryptobot *coin_symbol || coin_name*",
-                    value: "List information about single coin. (Use like: cryptobot btc)"
-                }
-            ]
-        };
-    };
-    return HelpObject;
-}());
+// args are optional options parameteres stacked after a hyphen, ie -dm
+function parseArgs(args) {
+    if (args.charAt(0) !== "-")
+        return null;
+}
+function checkEmbedLength(embed) {
+    return JSON.stringify(embed).length;
+}

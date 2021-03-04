@@ -17,12 +17,13 @@
 ```sh
 cryptobot list
 ```
-Lists top 5 coins by market cap
+Lists top 25 coins by market cap
 
 ```sh
-cryptobot list n
+cryptobot list n1-n2
+cryptobot list 75-100
 ```
-Lists top n coins by market cap (max 20)
+Lists a sliced ranking of cryptocoins by market cap. Max slice range is 25 (limited by discord message length limitations.)
 
 ```sh
 cryptobot btc

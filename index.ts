@@ -200,7 +200,6 @@ function help(command_list: string[], message: Message) {
 }
 function list(command_list: string[], message: Message) {
   let list_slice_request = command_list[1]
-  console.log(list_slice_request)
   if (!list_slice_request) {
     message.channel.send(`<@${message.author.id}>\n${new Ranking(prices).getObject()}`)
     return
