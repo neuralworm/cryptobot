@@ -220,16 +220,16 @@ function parseRange(number_range_string: string): number[] {
 }
 function compare(command_list: string[], message: Message) {
   let compare_array = []
-  for(let i = 1; i < command_list.length; i++){
+  for (let i = 1; i < command_list.length; i++) {
     compare_array.push(command_list[i])
   }
-  let index_array: number[] = compare_array.map((val)=> {
+  let index_array: number[] = compare_array.map((val) => {
     return getIndex(val)
-  }).slice(0, 20).filter((index)=>{
-    if(index >= 0 ) return true
+  }).slice(0, 20).filter((index) => {
+    if (index >= 0) return true
     return false
   })
- 
+
   message.channel.send(new Comparison(index_array, prices).render())
 }
 
@@ -247,7 +247,7 @@ async function send_single_coin(command_list: string[], message: Message) {
     // message.channel.send({embed: embed})
     console.log(days)
     // old embed version
-    message.channel.send(`<@${message.author.id}>`,{ embed: await new Ticker(index, numics_object[0], prices, meta, days).getObject() })
+    message.channel.send(`<@${message.author.id}>`, { embed: await new Ticker(index, numics_object[0], prices, meta, days).getObject() })
 
   }
   catch (err) {

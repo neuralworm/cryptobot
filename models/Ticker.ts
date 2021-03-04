@@ -91,6 +91,23 @@ export default class Ticker {
         inline: inline
       }
     }
+    returnMetaData(index: number): Field[]{
+      let field_array: Field[] = []
+      if(this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.website){
+        field_array.push(this.returnField("Website", this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.website))
+      }
+      if(this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.technical_doc[0]){
+        field_array.push(this.returnField('White Paper', this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.technical_doc[0]))
+      }
+      if(this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.explorer[0]){
+        field_array.push(this.returnField('Blockchain Viewer', this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.explorer[0]))
+      }
+      if(this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.source_code[0]){
+        field_array.push(this.returnField('Source Code', this.meta_data.data[this.prices.data[this.tickerIndex].id].urls.source_code[0]))
+      }
+   
+      return field_array
+    }
     async returnEmbedObject(): Promise<any> {
       return {
         color: 0x2ecc71,
@@ -107,7 +124,8 @@ export default class Ticker {
           // this.returnSpacer(),
           this.returnVolume(this.tickerIndex),
           this.returnSupply(this.tickerIndex),
-          // this.returnField(`Past ${(this.end_date.getTime() - this.start_date.getTime()) / (1000*60*60*24)} Days`, await this.render())
+          ...this.returnMetaData(this.tickerIndex)
+         
         ],
         timestamp: new Date(),
         footer: {
