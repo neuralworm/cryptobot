@@ -12,6 +12,7 @@ import Field from './models/Field'
 import Ticker from './models/Ticker'
 import Help from './models/Help'
 import Ranking from './models/Ranking'
+import Comparison from "./models/Comparison"
 require("dotenv").config()
 
 const API_KEY_NOMICS: string = process.env.API_TOKEN_NOMICS!
@@ -111,6 +112,7 @@ cron.schedule("*/15 * * * *", async () => {
 // API CALLS
 const API_ROOT_CMC = "https://pro-api.coinmarketcap.com"
 const API_ROOT_NOMICS = "https://api.nomics.com/v1"
+const API_ROOT_GECKO = "https://api.coingecko.com/api/v3/"
 const get_cmc_list = async (): Promise<any> => {
   let url = API_ROOT_CMC + "/v1/cryptocurrency/listings/latest?limit=500"
   console.log("using endpoint " + url)
@@ -217,13 +219,18 @@ function parseRange(number_range_string: string): number[] {
   return range
 }
 function compare(command_list: string[], message: Message) {
-  let coin_1 = command_list[1], coin_2 = command_list[2]
-  let index_1: number = getIndex(coin_1), index_2: number = getIndex(coin_2)
-  if (index_1 < 0 || index_2 < 0) {
-    message.channel.send(`Invalid coin identifier.`)
-    return
+  let compare_array = []
+  for(let i = 1; i < command_list.length; i++){
+    compare_array.push(command_list[i])
   }
-  message.channel.send(returnCompareString(index_1, index_2))
+  let index_array: number[] = compare_array.map((val)=> {
+    return getIndex(val)
+  }).slice(0, 20).filter((index)=>{
+    if(index >= 0 ) return true
+    return false
+  })
+ 
+  message.channel.send(new Comparison(index_array, prices).render())
 }
 
 async function send_single_coin(command_list: string[], message: Message) {
@@ -233,14 +240,14 @@ async function send_single_coin(command_list: string[], message: Message) {
     let numics_object = await get_by_token(ticker)
     console.log(numics_object)
     // if (!numics_object[0]) throw Error()
-
+    let days = parseInt(command_list[1]) || undefined
     // // new hotness
     // let embed = await new Ticker(index, numics_object[0], prices, meta).getObject()
     // // let body = await new Ticker(index, numics_object[0], prices, meta).render()
     // message.channel.send({embed: embed})
-
+    console.log(days)
     // old embed version
-    message.channel.send(`<@${message.author.id}>\n\`\`\`diff\n -priceup\`\`\`}`,{ embed: await new Ticker(index, numics_object[0], prices, meta).getObject() })
+    message.channel.send(`<@${message.author.id}>`,{ embed: await new Ticker(index, numics_object[0], prices, meta, days).getObject() })
 
   }
   catch (err) {
@@ -254,10 +261,7 @@ async function send_single_coin(command_list: string[], message: Message) {
 
 }
 
-function returnCompareString(index_1: number, index_2: number): string {
-  let string = "e"
-  return string
-}
+
 
 function sendError(message: Message) {
   message.channel.send('Invalid Command. Type **cryptobot help** for command list.')

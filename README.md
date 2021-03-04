@@ -6,7 +6,7 @@
   </a>
 </p>
 
-> A Discord bot for quickly checking crypto prices.  Can query from any of the top 500 cryptocoins via their commonly-used token names (i.e. btc, eth, etc.).
+> A Discord bot for quickly checking crypto prices.  Can query from any of the top 500 cryptocoins via their commonly-used token names (i.e. btc, eth, etc.) or full names (i.e. bitcoin, ethereum, etc.)
 
 ## Install
 

@@ -13,37 +13,38 @@ export default class Ticker {
     meta_data: any
     prices: any
     grid: Grid
-    spark_lines_url: string
-    spark_lines: any
+    ohlc_url: string
+    ohlc_data: Candle[]
     coin_token: string
-    start_date: Date
-    end_date: Date
-
-    constructor(tickerIndex: number = 0, numics_object: any = {}, prices: any, meta_data: any) {
+    days: number
+    constructor(tickerIndex: number = 0, numics_object: any = {}, prices: any, meta_data: any, days: number = 7) {
       this.tickerIndex = tickerIndex
       this.coin_object = numics_object
       this.prices = prices
       this.meta_data = meta_data
       this.grid = new Grid()
       this.coin_token = numics_object.id
-      this.end_date = new Date()
-      this.start_date = new Date(Date.now() - (1000*60*60*24*7))
-      this.spark_lines_url = `https://api.nomics.com/v1/currencies/sparkline?key=${process.env.API_TOKEN_NOMICS}&ids=${this.coin_token}&start=${this.start_date.toISOString()}&end=${this.end_date.toISOString()}`
+      this.days = days
+      this.ohlc_url = `https://api.coingecko.com/api/v3/coins/${prices.data[tickerIndex].slug}/ohlc?vs_currency=usd&days=${this.days}`
+      this.ohlc_data = []
+      this.getOHLC()
     }
-    async getSparklines(){
-      console.log(this.spark_lines_url)
+    async getOHLC(): Promise<Candle[]>{
+      console.log(this.ohlc_url)
       try{
         let id = this.coin_object.id
         // let res = await fetcher(this.spark_lines_url)
-        let res = await request({
-          uri: this.spark_lines_url,
-          json: true
-        })
-        console.log(res)
-        
+        let res = await fetcher(this.ohlc_url)
+        console.log(res.status)
+        if(res.status == 200){
+         let json = await res.json()
+         return json.map((obj: any)=> new Candle(obj[0], obj[1], obj[2], obj[3], obj[4]))
+        }
+        return []
       }
       catch(err){
         console.log(err)
+        return []
       }
      
     }
@@ -119,22 +120,22 @@ export default class Ticker {
       return template
     }
     
-    async createChart(): Promise<string[][]>{
-      let grid: string[][] = [['']]
-      await this.getSparklines()
-      let object = this.spark_lines[0]
-      // create grid section from spark_lines
-      let points: Point[] = object.timestamps.map((timestampString: string, index: number)=>{
-        return new Point(timestampString, object.prices[index])
-      })
+    // async createChart(): Promise<string[][]>{
+    //   let grid: string[][] = [['']]
+    //   await this.getOHLC()
+    //   let object = this.ohlc_data[0]
+    //   // create grid section from spark_lines
+    //   let points: Point[] = object.timestamps.map((timestampString: string, index: number)=>{
+    //     return new Point(timestampString, object.prices[index])
+    //   })
       
-      console.log(chart.plot(points.map(pnt=>pnt.price)))
+    //   console.log(chart.plot(points.map(pnt=>pnt.price)))
 
-      return grid
-    }
+    //   return grid
+    // }
     async render(): Promise<string>{
       // get spark lines
-      let chart = await this.createChart()
+      // let chart = await this.createChart()
       let rendered_string = ''
       
       this.grid.coordinates.forEach((array, array_index)=>{
@@ -160,5 +161,19 @@ export default class Ticker {
       let price = number
       if(price > 1000) price = price / 1000
       return price
+    }
+  }
+  class Candle{
+    date: Date
+    open: number
+    high: number
+    low: number
+    close: number
+    constructor(date: number, open: number, high: number, low: number, close: number){
+      this.date = new Date(date)
+      this.open = open
+      this.high = high
+      this.low = low
+      this.close = close
     }
   }
