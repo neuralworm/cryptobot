@@ -150,7 +150,6 @@ const get_by_token = async (token: string): Promise<any> => {
 
 client.on("message", (message: Message) => {
   let command = message.content.trim().toLowerCase()
-  console.log(command)
   // commands
   if (command.startsWith(prefix)) {
     let command_list = command.split(/ +/)
@@ -200,12 +199,23 @@ function help(command_list: string[], message: Message) {
 
 }
 function list(command_list: string[], message: Message) {
-  let number = parseInt(command_list[1])
-  console.log('sending list block')
-  message.channel.send(`<@${message.author.id}>\n${new Ranking(prices, number).getObject()}`)
+  let list_slice_request = command_list[1]
+  console.log(list_slice_request)
+  if (!list_slice_request) {
+    message.channel.send(`<@${message.author.id}>\n${new Ranking(prices).getObject()}`)
+    return
+  }
+  //  parse slice string here
+  let slice: number[] = parseRange(list_slice_request)
+  message.channel.send(`<@${message.author.id}>\n${new Ranking(prices, slice[0], slice[1]).getObject()}`)
   return
- 
 
+
+}
+function parseRange(number_range_string: string): number[] {
+  let range = number_range_string.split("-").map(string => parseInt(string))
+  console.log(range)
+  return range
 }
 function compare(command_list: string[], message: Message) {
   let coin_1 = command_list[1], coin_2 = command_list[2]
@@ -222,16 +232,23 @@ async function send_single_coin(command_list: string[], message: Message) {
   let index = getIndex(ticker)
   try {
     let numics_object = await get_by_token(ticker)
-    if (!numics_object[0]) throw Error()
-    // console.log(new Ticker(index, numics_object[0]).getObject())
-    message.channel.send({ embed: new Ticker(index, numics_object[0], prices, meta).getObject() })
+    console.log(numics_object)
+    // if (!numics_object[0]) throw Error()
+
+    // // new hotness
+    // let embed = await new Ticker(index, numics_object[0], prices, meta).getObject()
+    // // let body = await new Ticker(index, numics_object[0], prices, meta).render()
+    // message.channel.send({embed: embed})
+
+    // old embed version
+    message.channel.send({ embed: await new Ticker(index, numics_object[0], prices, meta).getObject() })
 
   }
   catch (err) {
-    if (index >= 0) {
-      message.channel.send({ embed: new Ticker(index, null, prices, meta).getObject() })
-      return
-    }
+    // if (index >= 0) {
+    //   message.channel.send({ embed: new Ticker(index, null, prices, meta).getObject() })
+    //   return
+    // }
     message.channel.send('Invalid coin identifier.')
   }
 

@@ -2,10 +2,12 @@ import { EmbedField, MessageEmbed } from 'discord.js'
 const comma = require('comma-number')
 export default class Ranking {
   prices: any
-  result_length: number
-  constructor(prices: any, result_length: number = 5) {
+  slice_start: number
+  slice_end: number
+  constructor(prices: any, slice_start: number = 1, slice_end: number = 25) {
     this.prices = prices
-    this.result_length = result_length < 21 ? result_length : 5
+    this.slice_start = slice_start
+    this.slice_end = slice_end - slice_start < 25 ? slice_end : slice_start + 25
   }
 
   returnField(index: number, prices: any): EmbedField[] {
@@ -30,9 +32,9 @@ export default class Ranking {
     ]
   }
 
-  returnFields(number: number = 5): EmbedField[] {
+  returnFields(slice_start: number, slice_end: number): EmbedField[] {
     let fields: EmbedField[] = []
-    for (let i = 0; i < number; i++) {
+    for (let i = slice_start - 1; i < slice_end ; i++) {
       // fields.push(this.returnField(i))
       fields = [...fields, ...this.returnField(i, this.prices)]
     }
@@ -54,7 +56,7 @@ export default class Ranking {
       // thumbnail: {
       //     url: 'https://i.imgur.com/wSTFkRM.png',
       // },
-      fields: this.returnFields(this.result_length),
+      fields: this.returnFields(this.slice_start, this.slice_end),
       // image: {
       // 	url: 'https://i.imgur.com/wSTFkRM.png',
       // },
@@ -72,12 +74,13 @@ export default class Ranking {
 
   // code block formatting
   returnCodeBlock(): string {
-    let table_columns = `[RNK][SYMB ][NAME      ][LAST PRICE(USD)][MARKET CAP(USD)][24h CHANGE]\n`
+    let table_columns = `[RNK][SYMB ][NAME        ][PRICE  (USD)][CAP  (USD)][    24H][     7D]\n`
     let string_template = `${table_columns}`
 
-    for (let i = 0; i < this.result_length; i++) {
+    for (let i = this.slice_start - 1; i < this.slice_end; i++) {
       string_template += this.returnStatRow(i)
     }
+    console.log(string_template.length)
     return "\`\`\`" + string_template + "\`\`\`"
   }
   returnStatBlock(string: string, length: number = 10, padding: boolean = true) {
@@ -87,8 +90,7 @@ export default class Ranking {
   }
   returnStatRow(index: number): string {
     let price_object = this.prices.data[index]
-    let entry_template = `${this.returnStatBlock(price_object.cmc_rank, 3)}${this.returnStatBlock(price_object.symbol.toUpperCase(), 5, false)}${this.returnStatBlock(price_object.name, 10, false)}${this.returnStatBlock(comma((price_object.quote.USD.price).toFixed(2)), 15)}${this.returnStatBlock(`${comma((price_object.quote.USD.market_cap / 1000000).toFixed(0))}M`, 15,)}${this.returnStatBlock(`${(price_object.quote.USD.percent_change_24h).toFixed(1)}%`, 10)}\n`
-
+    let entry_template = `${this.returnStatBlock(price_object.cmc_rank, 3)}${this.returnStatBlock(price_object.symbol.toUpperCase(), 5, false)}${this.returnStatBlock(price_object.name, 12, false)}${this.returnStatBlock(comma((price_object.quote.USD.price).toFixed(2)), 12)}${this.returnStatBlock(`${comma((price_object.quote.USD.market_cap / 1000000).toFixed(0))}M`, 10,)}${this.returnStatBlock(`${(price_object.quote.USD.percent_change_24h).toFixed(1)}%`, 7)}${this.returnStatBlock(`${(price_object.quote.USD.percent_change_7d).toFixed(1)}%`, 7)}\n`
     return entry_template
   }
 
