@@ -11,7 +11,7 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "dependencies": { 
     "asciichart": "^1.5.25",
     "comma-number": "^2.0.1",
     "discord.js": "^12.5.1",
