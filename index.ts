@@ -238,7 +238,7 @@ async function send_single_coin(command_list: string[], message: Message) {
   let ticker = command_list[0]
   let index = getIndex(ticker)
   try {
-    let numics_object = await get_by_token(ticker)
+    // let numics_object = await get_by_token(ticker)
     // console.log(numics_object)
     // if (!numics_object[0]) throw Error()
     let days = parseInt(command_list[1]) || undefined
@@ -247,14 +247,11 @@ async function send_single_coin(command_list: string[], message: Message) {
     // // let body = await new Ticker(index, numics_object[0], prices, meta).render()
     // message.channel.send({embed: embed})
     // old embed version
-    message.channel.send(`<@${message.author.id}>`, { embed: await new Ticker(index, numics_object[0], prices, meta, days).getObject() })
+    message.channel.send(`<@${message.author.id}>`, { embed: await new Ticker(index, prices, meta, days).getObject() })
 
   }
   catch (err) {
-    // if (index >= 0) {
-    //   message.channel.send({ embed: new Ticker(index, null, prices, meta).getObject() })
-    //   return
-    // }
+  console.log(err)
     message.channel.send('Invalid coin identifier.')
   }
 

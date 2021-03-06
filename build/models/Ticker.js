@@ -53,50 +53,14 @@ var fetcher = require('node-fetch');
 var request = require('request-promise');
 require('dotenv').config();
 var Ticker = /** @class */ (function () {
-    function Ticker(tickerIndex, numics_object, prices, meta_data, days) {
+    function Ticker(tickerIndex, prices, meta_data, days) {
         if (tickerIndex === void 0) { tickerIndex = 0; }
-        if (numics_object === void 0) { numics_object = {}; }
         if (days === void 0) { days = 7; }
         this.tickerIndex = tickerIndex;
-        this.coin_object = numics_object;
         this.prices = prices;
         this.meta_data = meta_data;
-        this.coin_token = numics_object.id;
         this.days = days;
-        this.ohlc_url = "https://api.coingecko.com/api/v3/coins/" + prices.data[tickerIndex].slug + "/ohlc?vs_currency=usd&days=" + this.days;
-        this.ohlc_data = [];
-        this.getOHLC();
     }
-    Ticker.prototype.getOHLC = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var id, res, json, err_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        console.log(this.ohlc_url);
-                        _a.label = 1;
-                    case 1:
-                        _a.trys.push([1, 5, , 6]);
-                        id = this.coin_object.id;
-                        return [4 /*yield*/, fetcher(this.ohlc_url)];
-                    case 2:
-                        res = _a.sent();
-                        console.log(res.status);
-                        if (!(res.status == 200)) return [3 /*break*/, 4];
-                        return [4 /*yield*/, res.json()];
-                    case 3:
-                        json = _a.sent();
-                        return [2 /*return*/, json.map(function (obj) { return new Candle(obj[0], obj[1], obj[2], obj[3], obj[4]); })];
-                    case 4: return [2 /*return*/, []];
-                    case 5:
-                        err_1 = _a.sent();
-                        console.log(err_1);
-                        return [2 /*return*/, []];
-                    case 6: return [2 /*return*/];
-                }
-            });
-        });
-    };
     Ticker.prototype.returnPrice = function (index) {
         return {
             value: "Last Price (Updated " + moment_1.default(this.prices.data[index].quote.USD.last_updated).fromNow() + ")",

@@ -9,44 +9,16 @@ const request = require('request-promise')
 require('dotenv').config()
 export default class Ticker {
     tickerIndex: number
-    coin_object: any
     meta_data: any
     prices: any
-    // grid: Grid
-    ohlc_url: string
-    ohlc_data: Candle[]
-    coin_token: string
     days: number
-    constructor(tickerIndex: number = 0, numics_object: any = {}, prices: any, meta_data: any, days: number = 7) {
+    constructor(tickerIndex: number = 0, prices: any, meta_data: any, days: number = 7) {
       this.tickerIndex = tickerIndex
-      this.coin_object = numics_object
       this.prices = prices
       this.meta_data = meta_data
-      this.coin_token = numics_object.id
       this.days = days
-      this.ohlc_url = `https://api.coingecko.com/api/v3/coins/${prices.data[tickerIndex].slug}/ohlc?vs_currency=usd&days=${this.days}`
-      this.ohlc_data = []
-      this.getOHLC()
     }
-    async getOHLC(): Promise<Candle[]>{
-      console.log(this.ohlc_url)
-      try{
-        let id = this.coin_object.id
-        // let res = await fetcher(this.spark_lines_url)
-        let res = await fetcher(this.ohlc_url)
-        console.log(res.status)
-        if(res.status == 200){
-         let json = await res.json()
-         return json.map((obj: any)=> new Candle(obj[0], obj[1], obj[2], obj[3], obj[4]))
-        }
-        return []
-      }
-      catch(err){
-        console.log(err)
-        return []
-      }
-     
-    }
+    
     returnPrice(index: number): any {
       return {
         value: `Last Price (Updated ${moment(this.prices.data[index].quote.USD.last_updated).fromNow()})`,

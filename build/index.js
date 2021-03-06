@@ -314,7 +314,7 @@ function compare(command_list, message) {
 }
 function send_single_coin(command_list, message) {
     return __awaiter(this, void 0, void 0, function () {
-        var ticker, index, numics_object, days, _a, _b, _c, err_4;
+        var ticker, index, days, _a, _b, _c, err_4;
         var _d;
         return __generator(this, function (_e) {
             switch (_e.label) {
@@ -323,13 +323,7 @@ function send_single_coin(command_list, message) {
                     index = getIndex(ticker);
                     _e.label = 1;
                 case 1:
-                    _e.trys.push([1, 4, , 5]);
-                    return [4 /*yield*/, get_by_token(ticker)
-                        // console.log(numics_object)
-                        // if (!numics_object[0]) throw Error()
-                    ];
-                case 2:
-                    numics_object = _e.sent();
+                    _e.trys.push([1, 3, , 4]);
                     days = parseInt(command_list[1]) || undefined;
                     // // new hotness
                     // let embed = await new Ticker(index, numics_object[0], prices, meta).getObject()
@@ -339,24 +333,21 @@ function send_single_coin(command_list, message) {
                     _b = (_a = message.channel).send;
                     _c = ["<@" + message.author.id + ">"];
                     _d = {};
-                    return [4 /*yield*/, new Ticker_1.default(index, numics_object[0], prices, meta, days).getObject()];
-                case 3:
+                    return [4 /*yield*/, new Ticker_1.default(index, prices, meta, days).getObject()];
+                case 2:
                     // // new hotness
                     // let embed = await new Ticker(index, numics_object[0], prices, meta).getObject()
                     // // let body = await new Ticker(index, numics_object[0], prices, meta).render()
                     // message.channel.send({embed: embed})
                     // old embed version
                     _b.apply(_a, _c.concat([(_d.embed = _e.sent(), _d)]));
-                    return [3 /*break*/, 5];
-                case 4:
+                    return [3 /*break*/, 4];
+                case 3:
                     err_4 = _e.sent();
-                    // if (index >= 0) {
-                    //   message.channel.send({ embed: new Ticker(index, null, prices, meta).getObject() })
-                    //   return
-                    // }
+                    console.log(err_4);
                     message.channel.send('Invalid coin identifier.');
-                    return [3 /*break*/, 5];
-                case 5: return [2 /*return*/];
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
             }
         });
     });
