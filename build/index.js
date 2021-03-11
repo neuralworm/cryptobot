@@ -245,12 +245,20 @@ client.on("message", function (message) {
     }
     // bot being mentioned
     if (message.mentions.users.has(bot_id)) {
-        console.log('here');
         parseBotMentions(message);
     }
 });
 function parseBotMentions(message) {
-    message.channel.send("Hello, <@" + message.author.id + ">");
+    var command = message.content.trim().toLowerCase();
+    if (command.split(/ +/).includes("hello")) {
+        message.channel.send("Hello, <@" + message.author.id + ">");
+    }
+    else {
+        var command_list = command.split(/ +/);
+        command_list.shift();
+        commandParser(command_list[0], command_list, message);
+        return;
+    }
 }
 // receive event commands
 function commandParser(primary_command, command_list, message) {
